@@ -138,7 +138,7 @@ const handleRightClick = () => {
       class="absolute top-1 right-1 px-1.5 py-0.5 text-[9px] font-black rounded-md leading-none select-none"
       :class="isSpecial ? 'bg-amber-400 text-slate-950' : 'bg-emerald-400 text-slate-950'"
     >
-      x{{ quantity }}
+      +{{ quantity - 1 }}
     </div>
   </button>
 </template>

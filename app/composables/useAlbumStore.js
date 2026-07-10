@@ -157,6 +157,45 @@ export const useAlbumStore = () => {
     }
   }
 
+  // Mark all stickers of a country as collected (set to 1 if currently 0)
+  const completeCountry = async (countryId, totalStickers) => {
+    if (!import.meta.client) return
+
+    loading.value = true
+    try {
+      const storageKey = getStorageKey()
+      const rowsToUpsert = []
+
+      for (let i = 1; i <= totalStickers; i++) {
+        const key = `${countryId}_${i}`
+        const currentQty = stickers.value[key] || 0
+        if (currentQty === 0) {
+          stickers.value[key] = 1
+          if (user.value) {
+            rowsToUpsert.push({
+              user_id: user.value.id,
+              country_id: countryId,
+              number: i,
+              quantity: 1
+            })
+          }
+        }
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(stickers.value))
+
+      if (user.value && rowsToUpsert.length > 0) {
+        const { error } = await supabase.from('figuritas').upsert(rowsToUpsert)
+        if (error) throw error
+      }
+    } catch (e) {
+      console.error('Error completing country:', e)
+      syncError.value = e.message || 'Error al completar la selección'
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Reset entire album state
   const resetAlbum = async () => {
     if (!import.meta.client) return
@@ -254,6 +293,7 @@ export const useAlbumStore = () => {
     countryStats,
     loadStoreData,
     updateSticker,
+    completeCountry,
     resetAlbum
   }
 }
