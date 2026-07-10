@@ -235,11 +235,14 @@ export const useAlbumStore = () => {
       const storageKey = getStorageKey();
       localStorage.setItem(storageKey, JSON.stringify(stickers.value));
 
-      if (user.value) {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userId = currentUser?.id || user.value?.id;
+
+      if (userId) {
         const { error } = await supabase
           .from("figuritas")
           .delete()
-          .eq("user_id", user.value.id);
+          .eq("user_id", userId);
 
         if (error) throw error;
       }
