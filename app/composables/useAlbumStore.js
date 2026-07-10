@@ -185,7 +185,9 @@ export const useAlbumStore = () => {
       localStorage.setItem(storageKey, JSON.stringify(stickers.value))
 
       if (user.value && rowsToUpsert.length > 0) {
-        const { error } = await supabase.from('figuritas').upsert(rowsToUpsert)
+        const { error } = await supabase
+          .from('figuritas')
+          .upsert(rowsToUpsert, { onConflict: 'user_id,country_id,number' })
         if (error) throw error
       }
     } catch (e) {
