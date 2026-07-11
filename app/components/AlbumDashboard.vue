@@ -14,6 +14,7 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  X,
 } from "@lucide/vue";
 
 const emit = defineEmits(["logout"]);
@@ -152,15 +153,17 @@ const handleCompleteCountry = async () => {
       <!-- User Auth Panel -->
       <div class="flex items-center gap-2">
         <div v-if="user" class="flex items-center gap-2">
-          <div class="hidden xs:flex flex-col items-end">
+          <div class="flex flex-col items-end">
             <span
               class="text-[9px] font-semibold text-slate-500 uppercase tracking-widest leading-none"
               >Usuario</span
             >
             <span
-              class="text-xs font-bold text-emerald-400 max-w-[120px] truncate"
-              >{{ user.email }}</span
+              class="text-xs font-bold text-slate-300 max-w-[120px] truncate"
+              :title="user.email"
             >
+              {{ user.email }}
+            </span>
           </div>
           <button
             @click="handleSignOut"
@@ -243,7 +246,8 @@ const handleCompleteCountry = async () => {
           class="w-full bg-slate-950 rounded-full h-3.5 p-0.5 border border-slate-900 overflow-hidden mb-5"
         >
           <div
-            class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 relative"
+            class="bg-gradient-to-r h-full rounded-full transition-all duration-500 relative"
+            :class="stats.progressPercent === 100 ? 'from-amber-500 to-yellow-400' : 'from-emerald-500 to-teal-400'"
             :style="{ width: `${stats.progressPercent}%` }"
           >
             <!-- Shinning bar stripe -->
@@ -318,8 +322,16 @@ const handleCompleteCountry = async () => {
             v-model="searchQuery"
             type="text"
             placeholder="Buscar país o código (ej. ARG, México)..."
-            class="w-full bg-slate-900/60 border border-slate-800 focus:border-emerald-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs text-slate-100 placeholder-slate-600 focus:outline-none transition-all"
+            class="w-full bg-slate-900/60 border border-slate-800 focus:border-emerald-500/50 rounded-xl py-2.5 pl-10 pr-9 text-xs text-slate-100 placeholder-slate-600 focus:outline-none transition-all"
           />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            type="button"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+          </button>
         </div>
 
         <!-- Filter Mode tabs -->
@@ -422,7 +434,8 @@ const handleCompleteCountry = async () => {
                 class="w-16 bg-slate-900 h-1 rounded-full overflow-hidden mt-1"
               >
                 <div
-                  class="bg-emerald-500 h-full rounded-full"
+                  class="h-full rounded-full"
+                  :class="countryStats[selectedCountry.id]?.percent === 100 ? 'bg-amber-400' : 'bg-emerald-500'"
                   :style="{
                     width: `${countryStats[selectedCountry.id]?.percent}%`,
                   }"
@@ -447,12 +460,16 @@ const handleCompleteCountry = async () => {
             v-for="c in filteredCountries"
             :key="c.id"
             @click="selectCountryAndCollapse(c)"
-            class="bg-slate-950/60 hover:bg-slate-900 border rounded-2xl p-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer min-h-[92px]"
-            :class="
-              selectedCountry.id === c.id
-                ? 'border-emerald-500 text-slate-50 shadow-md shadow-emerald-500/5 ring-1 ring-emerald-500/30'
-                : 'border-slate-900 text-slate-400 hover:border-slate-800'
-            "
+            class="border rounded-2xl p-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer min-h-[92px]"
+            :class="[
+              countryStats[c.id]?.percent === 100
+                ? selectedCountry.id === c.id
+                  ? 'bg-gradient-to-b from-slate-950/60 to-amber-950/20 border-amber-400 text-slate-50 shadow-md shadow-amber-500/10 ring-1 ring-amber-400/30'
+                  : 'bg-gradient-to-b from-slate-950/60 to-amber-950/10 border-amber-950/50 text-amber-500/80 hover:border-amber-500/30'
+                : selectedCountry.id === c.id
+                  ? 'bg-slate-950/60 hover:bg-slate-900 border-emerald-500 text-slate-50 shadow-md shadow-emerald-500/5 ring-1 ring-emerald-500/30'
+                  : 'bg-slate-950/60 hover:bg-slate-900 border-slate-900 text-slate-400 hover:border-slate-800'
+            ]"
           >
             <!-- Country Flag -->
             <span class="text-2xl select-none">{{ c.flag }}</span>
@@ -462,7 +479,10 @@ const handleCompleteCountry = async () => {
               >{{ c.id }}</span
             >
             <!-- Progress text -->
-            <span class="text-[9px] font-bold text-slate-500">
+            <span
+              class="text-[9px] font-bold"
+              :class="countryStats[c.id]?.percent === 100 ? 'text-amber-500' : 'text-slate-500'"
+            >
               {{ countryStats[c.id]?.collected }}/{{ c.total }}
             </span>
             <!-- Country tiny progress bar -->
@@ -470,7 +490,8 @@ const handleCompleteCountry = async () => {
               class="w-full bg-slate-900 h-1 rounded-full overflow-hidden mt-1"
             >
               <div
-                class="bg-emerald-500 h-full rounded-full"
+                class="h-full rounded-full"
+                :class="countryStats[c.id]?.percent === 100 ? 'bg-amber-400' : 'bg-emerald-500'"
                 :style="{ width: `${countryStats[c.id]?.percent}%` }"
               ></div>
             </div>
